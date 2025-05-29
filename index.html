@@ -6,34 +6,35 @@
     body { margin: 0; font-family: sans-serif; display: flex; height: 100vh; }
     #chat { width: 40%; border-right: 1px solid #ccc; }
     #results { width: 60%; padding: 1rem; overflow-y: auto; }
+    iframe { width: 100%; height: 100%; border: none; }
     .result { border: 1px solid #ddd; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; }
   </style>
 </head>
 <body>
 
-  <!-- LEFT SIDE: Empty visual placeholder -->
-  <div id="chat"></div>
+  <!-- LEFT SIDE: Embedded Chatbot via iframe -->
+  <div id="chat">
+    <iframe
+      id="chatbot-iframe"
+      title="Max the Mojo Magician">
+    </iframe>
+  </div>
 
   <!-- RIGHT SIDE: Dynamic Search Results -->
   <div id="results">
     <h1>Results for: <span id="search-term"></span></h1>
   </div>
 
-  <!-- ✅ CBB Floating Chat Widget (outside module) -->
-  <script src="https://app.chatgptbuilder.io/webchat/plugin.js?v=6"></script>
+  <!-- ✅ Inject Max with sessionId into iframe -->
   <script>
     const sessionId = localStorage.getItem("mojoSessionId") || crypto.randomUUID();
     localStorage.setItem("mojoSessionId", sessionId);
 
-    ktt10.setup({
-      id: "h201F03x4e4lBQI0",
-      accountId: "1349554",
-      color: "#710725",
-      params: { sessionId }
-    });
+    const iframe = document.getElementById("chatbot-iframe");
+    iframe.src = `https://app.chatgptbuilder.io/webchat/?p=1349554&id=h201F03x4e4lBQI0&sessionId=${sessionId}`;
   </script>
 
-  <!-- ✅ Firebase Search-Term Sync -->
+  <!-- ✅ Firebase + Realtime Search Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -52,7 +53,6 @@
     const db = getDatabase(app);
     const sessionId = localStorage.getItem("mojoSessionId");
 
-    // ✅ Listen for Max search terms
     const sessionRef = ref(db, `sessions/${sessionId}`);
     onValue(sessionRef, snapshot => {
       const data = snapshot.val();
@@ -61,7 +61,6 @@
       }
     });
 
-    // ✅ Manual test: send fake search term
     window.simulateSearch = function () {
       const testTerm = prompt("Enter a search term to simulate:", "hell island");
       if (testTerm) {
@@ -69,7 +68,6 @@
       }
     };
 
-    // ✅ Load and show results
     function showSearchResults(term) {
       document.getElementById("search-term").textContent = term;
       fetch('./results.json')
@@ -92,13 +90,10 @@
     }
   </script>
 
-  <!-- ✅ Test Button -->
+  <!-- ✅ Manual test button -->
   <button onclick="simulateSearch()" style="position:fixed; bottom:10px; right:10px; z-index:999;">
     Test Firebase Write
   </button>
 
 </body>
 </html>
-
-
-
