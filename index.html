@@ -6,35 +6,36 @@
     body { margin: 0; font-family: sans-serif; display: flex; height: 100vh; }
     #chat { width: 40%; border-right: 1px solid #ccc; }
     #results { width: 60%; padding: 1rem; overflow-y: auto; }
-    iframe { width: 100%; height: 100%; border: none; }
     .result { border: 1px solid #ddd; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; }
   </style>
 </head>
 <body>
 
-  <!-- LEFT SIDE: Embedded Max Chatbot -->
+  <!-- LEFT PANEL: Placeholder or static message -->
   <div id="chat">
-    <iframe
-      id="chatbot-iframe"
-      title="Max the Mojo Magician">
-    </iframe>
+    <p style="padding: 1rem;">Max will pop up in the bottom-right corner...</p>
   </div>
 
-  <!-- RIGHT SIDE: Dynamic Search Results -->
+  <!-- RIGHT PANEL: Search Results -->
   <div id="results">
     <h1>Results for: <span id="search-term"></span></h1>
   </div>
 
-  <!-- ✅ Inject Max iframe with session ID -->
+  <!-- ✅ Max as Floating Bubble -->
+  <script src="https://app.chatgptbuilder.io/webchat/plugin.js?v=6"></script>
   <script>
     const sessionId = localStorage.getItem("mojoSessionId") || crypto.randomUUID();
     localStorage.setItem("mojoSessionId", sessionId);
 
-    const iframe = document.getElementById("chatbot-iframe");
-    iframe.src = `https://app.chatgptbuilder.io/webchat/?p=1349554&id=h201F03x4e4lBQI0&sessionId=${sessionId}`;
+    ktt10.setup({
+      id: "h201F03x4e4lBQI0",
+      accountId: "1349554",
+      color: "#710725",
+      params: { sessionId }
+    });
   </script>
 
-  <!-- ✅ Firebase + Search Result Sync -->
+  <!-- ✅ Firebase + Result Panel Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -53,7 +54,6 @@
     const db = getDatabase(app);
     const sessionId = localStorage.getItem("mojoSessionId");
 
-    // ✅ Listen for Firebase updates from Max
     const sessionRef = ref(db, `sessions/${sessionId}`);
     onValue(sessionRef, snapshot => {
       const data = snapshot.val();
@@ -62,7 +62,6 @@
       }
     });
 
-    // ✅ Manual test: simulate Max writing to Firebase
     window.simulateSearch = function () {
       const testTerm = prompt("Enter a search term to simulate:", "hell island");
       if (testTerm) {
@@ -70,7 +69,6 @@
       }
     };
 
-    // ✅ Render results in right panel
     function showSearchResults(term) {
       document.getElementById("search-term").textContent = term;
       fetch('./results.json')
@@ -93,7 +91,7 @@
     }
   </script>
 
-  <!-- ✅ Test Button -->
+  <!-- ✅ Manual test button -->
   <button onclick="simulateSearch()" style="position:fixed; bottom:10px; right:10px; z-index:999;">
     Test Firebase Write
   </button>
