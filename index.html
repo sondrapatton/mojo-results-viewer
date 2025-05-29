@@ -11,17 +11,17 @@
 </head>
 <body>
 
-  <!-- LEFT PANEL: Placeholder or static message -->
+  <!-- LEFT PANEL (chat bubble note only) -->
   <div id="chat">
-    <p style="padding: 1rem;">Max will pop up in the bottom-right corner...</p>
+    <p style="padding: 1rem;">Max is available in the bottom-right corner of your screen.</p>
   </div>
 
-  <!-- RIGHT PANEL: Search Results -->
+  <!-- RIGHT PANEL: Dynamic Search Results -->
   <div id="results">
-    <h1>Results for: <span id="search-term"></span></h1>
+    <h1>Results for: <span id="search-term">None yet</span></h1>
   </div>
 
-  <!-- ✅ Max as Floating Bubble -->
+  <!-- ✅ Max as floating chat bubble -->
   <script src="https://app.chatgptbuilder.io/webchat/plugin.js?v=6"></script>
   <script>
     const sessionId = localStorage.getItem("mojoSessionId") || crypto.randomUUID();
@@ -35,7 +35,7 @@
     });
   </script>
 
-  <!-- ✅ Firebase + Result Panel Logic -->
+  <!-- ✅ Firebase + Realtime Display from Stored Results -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -57,44 +57,28 @@
     const sessionRef = ref(db, `sessions/${sessionId}`);
     onValue(sessionRef, snapshot => {
       const data = snapshot.val();
-      if (data?.searchTerm) {
-        showSearchResults(data.searchTerm);
+      if (data?.searchResults) {
+        showSearchResults(data.searchResults);
       }
     });
 
-    window.simulateSearch = function () {
-      const testTerm = prompt("Enter a search term to simulate:", "hell island");
-      if (testTerm) {
-        set(ref(db, `sessions/${sessionId}`), { searchTerm: testTerm });
-      }
-    };
+    function showSearchResults(resultsArray) {
+      document.getElementById("search-term").textContent = "Live Results";
+      const container = document.getElementById("results");
+      container.innerHTML = '';
 
-    function showSearchResults(term) {
-      document.getElementById("search-term").textContent = term;
-      fetch('./results.json')
-        .then(res => res.json())
-        .then(data => {
-          const matches = data.filter(row => row.term.toLowerCase().includes(term.toLowerCase()));
-          const container = document.getElementById("results");
-          container.innerHTML = '';
-          matches.forEach(item => {
-            const div = document.createElement("div");
-            div.className = "result";
-            div.innerHTML = `
-              <div><strong>${item.course}</strong> – ${item.module}</div>
-              <div>Timestamp: ${item.timestamp}</div>
-              <a href="${item.link}" target="_blank">Go to Lesson</a>
-            `;
-            container.appendChild(div);
-          });
-        });
+      resultsArray.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "result";
+        div.innerHTML = `
+          <div><strong>${item.course}</strong> – ${item.module}</div>
+          <div>Timestamp: ${item.timestamp}</div>
+          <a href="${item.link}" target="_blank">Go to Lesson</a>
+        `;
+        container.appendChild(div);
+      });
     }
   </script>
-
-  <!-- ✅ Manual test button -->
-  <button onclick="simulateSearch()" style="position:fixed; bottom:10px; right:10px; z-index:999;">
-    Test Firebase Write
-  </button>
 
 </body>
 </html>
