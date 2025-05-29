@@ -1,0 +1,23 @@
+[
+  {
+    "term": "hell island",
+    "course": "Rainmaker Mojo",
+    "module": "Module 3",
+    "timestamp": "15:30",
+    "link": "https://example.com/rainmaker/module3"
+  },
+  {
+    "term": "hell island",
+    "course": "Mojo Mindset",
+    "module": "Module 2",
+    "timestamp": "04:45",
+    "link": "https://example.com/mindset/module2"
+  },
+  {
+    "term": "rainmaker",
+    "course": "Rainmaker Mojo",
+    "module": "Module 1",
+    "timestamp": "00:00",
+    "link": "https://example.com/rainmaker/module1"
+  }
+]
