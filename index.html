@@ -12,7 +12,7 @@
 </head>
 <body>
 
-  <!-- LEFT SIDE: Embedded Max Web App -->
+  <!-- LEFT SIDE: Embedded Max Chatbot -->
   <div id="chat">
     <iframe
       id="chatbot-iframe"
@@ -25,7 +25,7 @@
     <h1>Results for: <span id="search-term"></span></h1>
   </div>
 
-  <!-- ✅ Inject Max's full-page webchat into iframe with sessionId -->
+  <!-- ✅ Inject Max iframe with session ID -->
   <script>
     const sessionId = localStorage.getItem("mojoSessionId") || crypto.randomUUID();
     localStorage.setItem("mojoSessionId", sessionId);
@@ -34,7 +34,7 @@
     iframe.src = `https://app.chatgptbuilder.io/webchat/?p=1349554&id=h201F03x4e4lBQI0&sessionId=${sessionId}`;
   </script>
 
-  <!-- ✅ Firebase + Realtime Search Results -->
+  <!-- ✅ Firebase + Search Result Sync -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -53,6 +53,7 @@
     const db = getDatabase(app);
     const sessionId = localStorage.getItem("mojoSessionId");
 
+    // ✅ Listen for Firebase updates from Max
     const sessionRef = ref(db, `sessions/${sessionId}`);
     onValue(sessionRef, snapshot => {
       const data = snapshot.val();
@@ -61,6 +62,7 @@
       }
     });
 
+    // ✅ Manual test: simulate Max writing to Firebase
     window.simulateSearch = function () {
       const testTerm = prompt("Enter a search term to simulate:", "hell island");
       if (testTerm) {
@@ -68,6 +70,7 @@
       }
     };
 
+    // ✅ Render results in right panel
     function showSearchResults(term) {
       document.getElementById("search-term").textContent = term;
       fetch('./results.json')
@@ -90,7 +93,7 @@
     }
   </script>
 
-  <!-- ✅ Manual Test Button -->
+  <!-- ✅ Test Button -->
   <button onclick="simulateSearch()" style="position:fixed; bottom:10px; right:10px; z-index:999;">
     Test Firebase Write
   </button>
