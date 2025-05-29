@@ -11,17 +11,15 @@
 </head>
 <body>
 
-  <!-- LEFT SIDE: Chatbot -->
-  <div id="chat">
-    <iframe id="chat-frame" style="width:100%; height:100%; border:none;"></iframe>
-  </div>
+  <!-- LEFT SIDE: Empty visual placeholder -->
+  <div id="chat"></div>
 
   <!-- RIGHT SIDE: Dynamic Search Results -->
   <div id="results">
     <h1>Results for: <span id="search-term"></span></h1>
   </div>
 
-  <!-- CBB Chatbot Setup (this MUST go outside the module script!) -->
+  <!-- ✅ CBB Floating Chat Widget (outside module) -->
   <script src="https://app.chatgptbuilder.io/webchat/plugin.js?v=6"></script>
   <script>
     const sessionId = localStorage.getItem("mojoSessionId") || crypto.randomUUID();
@@ -35,12 +33,11 @@
     });
   </script>
 
-  <!-- Firebase + Logic -->
+  <!-- ✅ Firebase Search-Term Sync -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    // ✅ Your Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDQpTZ_nnViWEEfPIz1I1GgTbQu3i5pQMM",
       authDomain: "mojo-chat-sync-test.firebaseapp.com",
@@ -51,14 +48,11 @@
       appId: "1:322619127041:web:ea086e1982cc37f03b9700"
     };
 
-    // ✅ Init Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
-    // ✅ Read sessionId again for consistency
     const sessionId = localStorage.getItem("mojoSessionId");
 
-    // ✅ Listen for search term updates on this session
+    // ✅ Listen for Max search terms
     const sessionRef = ref(db, `sessions/${sessionId}`);
     onValue(sessionRef, snapshot => {
       const data = snapshot.val();
@@ -67,7 +61,7 @@
       }
     });
 
-    // ✅ Simulate Max writing to Firebase (for testing)
+    // ✅ Manual test: send fake search term
     window.simulateSearch = function () {
       const testTerm = prompt("Enter a search term to simulate:", "hell island");
       if (testTerm) {
@@ -75,7 +69,7 @@
       }
     };
 
-    // ✅ Show matching results
+    // ✅ Load and show results
     function showSearchResults(term) {
       document.getElementById("search-term").textContent = term;
       fetch('./results.json')
@@ -98,12 +92,13 @@
     }
   </script>
 
-  <!-- Floating button to trigger test write -->
+  <!-- ✅ Test Button -->
   <button onclick="simulateSearch()" style="position:fixed; bottom:10px; right:10px; z-index:999;">
     Test Firebase Write
   </button>
 
 </body>
 </html>
+
 
 
