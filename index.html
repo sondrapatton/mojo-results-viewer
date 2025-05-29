@@ -12,7 +12,7 @@
 </head>
 <body>
 
-  <!-- LEFT SIDE: Embedded Chatbot via iframe -->
+  <!-- LEFT SIDE: Embedded Max Web App -->
   <div id="chat">
     <iframe
       id="chatbot-iframe"
@@ -25,7 +25,7 @@
     <h1>Results for: <span id="search-term"></span></h1>
   </div>
 
-  <!-- ✅ Inject Max with sessionId into iframe -->
+  <!-- ✅ Inject Max's full-page webchat into iframe with sessionId -->
   <script>
     const sessionId = localStorage.getItem("mojoSessionId") || crypto.randomUUID();
     localStorage.setItem("mojoSessionId", sessionId);
@@ -34,7 +34,7 @@
     iframe.src = `https://app.chatgptbuilder.io/webchat/?p=1349554&id=h201F03x4e4lBQI0&sessionId=${sessionId}`;
   </script>
 
-  <!-- ✅ Firebase + Realtime Search Logic -->
+  <!-- ✅ Firebase + Realtime Search Results -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -90,7 +90,7 @@
     }
   </script>
 
-  <!-- ✅ Manual test button -->
+  <!-- ✅ Manual Test Button -->
   <button onclick="simulateSearch()" style="position:fixed; bottom:10px; right:10px; z-index:999;">
     Test Firebase Write
   </button>
