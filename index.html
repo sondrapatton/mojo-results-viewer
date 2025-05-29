@@ -10,84 +10,11 @@
     .result { border: 1px solid #ddd; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; }
   </style>
 </head>
-<button onclick="simulateSearch()" style="position:fixed; bottom:10px; right:10px; z-index:999;">Test Firebase Write</button>
+<body>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // Session logic
-  let sessionId = localStorage.getItem("mojoSessionId");
-  if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    localStorage.setItem("mojoSessionId", sessionId);
-  }
-
-  // Inject chatbot iframe (optional during test)
-  document.getElementById("chat").innerHTML = `
-    <iframe src="https://chat.chatbotbuilder.ai/chat/h201F03x4e4lBQI0?sessionId=${sessionId}"
-            width="100%" height="100%" frameborder="0"></iframe>
-  `;
-
-  // Listen to updates from this session
-  const sessionRef = ref(db, `sessions/${sessionId}`);
-  onValue(sessionRef, snapshot => {
-    const data = snapshot.val();
-    if (data?.searchTerm) {
-      showSearchResults(data.searchTerm);
-    }
-  });
-
-  // Simulate writing to Firebase
-  window.simulateSearch = function () {
-    const testTerm = prompt("Enter a search term to simulate:", "hell island");
-    if (testTerm) {
-      set(ref(db, `sessions/${sessionId}`), { searchTerm: testTerm });
-    }
-  };
-
-  // Display results
-  function showSearchResults(term) {
-    document.getElementById("search-term").textContent = term;
-    fetch('./results.json')
-      .then(res => res.json())
-      .then(data => {
-        const matches = data.filter(row => row.term.toLowerCase().includes(term.toLowerCase()));
-        const container = document.getElementById("results");
-        container.innerHTML = '';
-        matches.forEach(item => {
-          const div = document.createElement("div");
-          div.className = "result";
-          div.innerHTML = `
-            <div><strong>${item.course}</strong> – ${item.module}</div>
-            <div>Timestamp: ${item.timestamp}</div>
-            <a href="${item.link}" target="_blank">Go to Lesson</a>
-          `;
-          container.appendChild(div);
-        });
-      });
-  }
-</script>
-  <body>
-  <!-- LEFT SIDE: Chatbot Embed -->
+  <!-- LEFT SIDE: Chatbot -->
   <div id="chat">
-    <iframe
-      src="https://chat.chatbotbuilder.ai/chat/h201F03x4e4lBQI0"
-      title="Max the Mojo Magician">
-    </iframe>
+    <!-- Chatbot iframe will be injected via JS with sessionId -->
   </div>
 
   <!-- RIGHT SIDE: Dynamic Search Results -->
@@ -95,34 +22,85 @@
     <h1>Results for: <span id="search-term"></span></h1>
   </div>
 
-  <!-- JS to load results -->
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const searchTerm = params.get("q")?.toLowerCase();
-    document.getElementById("search-term").textContent = searchTerm || "None";
+  <!-- Firebase + Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    fetch('./results.json')
-      .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById("results");
-        const matches = data.filter(row => row.term.toLowerCase().includes(searchTerm));
-        if (!matches.length) {
-          container.innerHTML += "<p>No results found.</p>";
-          return;
-        }
+    // ✅ Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQpTZ_nnViWEEfPIz1I1GgTbQu3i5pQMM",
+      authDomain: "mojo-chat-sync-test.firebaseapp.com",
+      databaseURL: "https://mojo-chat-sync-test-default-rtdb.firebaseio.com",
+      projectId: "mojo-chat-sync-test",
+      storageBucket: "mojo-chat-sync-test.appspot.com",
+      messagingSenderId: "322619127041",
+      appId: "1:322619127041:web:ea086e1982cc37f03b9700"
+    };
 
-        matches.forEach(item => {
-          const div = document.createElement("div");
-          div.className = "result";
-          div.innerHTML = `
-            <div><strong>${item.course}</strong> – ${item.module}</div>
-            <div>Timestamp: ${item.timestamp}</div>
-            <a href="${item.link}" target="_blank">Go to Lesson</a>
-          `;
-          container.appendChild(div);
+    // ✅ Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // ✅ Get or create session ID
+    let sessionId = localStorage.getItem("mojoSessionId");
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      localStorage.setItem("mojoSessionId", sessionId);
+    }
+
+    // ✅ Inject Max’s iframe with session ID
+    document.getElementById("chat").innerHTML = `
+      <iframe src="https://chat.chatbotbuilder.ai/chat/h201F03x4e4lBQI0?sessionId=${sessionId}"
+              title="Max the Mojo Magician">
+      </iframe>
+    `;
+
+    // ✅ Listen for search term updates on this session
+    const sessionRef = ref(db, `sessions/${sessionId}`);
+    onValue(sessionRef, snapshot => {
+      const data = snapshot.val();
+      if (data?.searchTerm) {
+        showSearchResults(data.searchTerm);
+      }
+    });
+
+    // ✅ Simulate Max writing to Firebase (for testing)
+    window.simulateSearch = function () {
+      const testTerm = prompt("Enter a search term to simulate:", "hell island");
+      if (testTerm) {
+        set(ref(db, `sessions/${sessionId}`), { searchTerm: testTerm });
+      }
+    };
+
+    // ✅ Show matching results
+    function showSearchResults(term) {
+      document.getElementById("search-term").textContent = term;
+      fetch('./results.json')
+        .then(res => res.json())
+        .then(data => {
+          const matches = data.filter(row => row.term.toLowerCase().includes(term.toLowerCase()));
+          const container = document.getElementById("results");
+          container.innerHTML = '';
+          matches.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "result";
+            div.innerHTML = `
+              <div><strong>${item.course}</strong> – ${item.module}</div>
+              <div>Timestamp: ${item.timestamp}</div>
+              <a href="${item.link}" target="_blank">Go to Lesson</a>
+            `;
+            container.appendChild(div);
+          });
         });
-      });
+    }
   </script>
+
+  <!-- Floating button to trigger test write -->
+  <button onclick="simulateSearch()" style="position:fixed; bottom:10px; right:10px; z-index:999;">
+    Test Firebase Write
+  </button>
+
 </body>
 </html>
 
