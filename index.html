@@ -20,7 +20,7 @@
     if (!searchTerm) {
       document.getElementById("results").innerHTML = "<p>No search term provided in the URL.</p>";
     } else {
-      fetch('results.json')
+      fetch('./results.json')
         .then(response => response.json())
         .then(data => {
           const matches = data.filter(row => row.term.toLowerCase().includes(searchTerm));
